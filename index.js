@@ -2,12 +2,13 @@ const express = require('express')
 const cors = require('cors');
 require('dotenv').config()
 const { MongoClient, ServerApiVersion } = require('mongodb');
+// const cookieParser = require('cookie-parser');
 const app = express()
 
 const port = process.env.PORT || 5000
 
 app.use(cors());
-// app.use(bodyParser.json());
+// app.use(cookieParser.json());
 app.use(express.json())
 
 
@@ -26,12 +27,36 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    const userCollection = client.db("smartCashDb").collection("users")
+
+
+
+// User related Api ------------------------------------Start>
+
+// Post a user in userCollection when login register
+app.post('/user', async (req, res) => {
+    const user = req.body;
+    // user menber or not ................ star>
+    const query = { email: user.email }
+    const existingUser = await userCollection.findOne(query);
+    if (existingUser) {
+      return res.send({ message: 'User Already exists', insertedId: null })
+    }
+    // user menber or not ................ end>
+
+    const result = await userCollection.insertOne(user)
+    res.send(result)
+  })
+
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
