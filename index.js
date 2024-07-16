@@ -26,23 +26,45 @@ async function run() {
     const db = client.db("smartCashDb");
     
     const userCollection = db.collection("users");
+    // const userRequestCollection = db.collection("users");
+    const userRequestCollection = client.db("smartCashDb").collection("userRequest")
 
-    app.post('/register', async (req, res) => {
-      const user = req.body;
-      const query = { email: user.email };
-      const existingUser = await userCollection.findOne(query);
+ // req to admin for register-------------->>>>>>>>>> Start  
 
-      if (existingUser) {
-        return res.status(400).json({ message: 'User already exists' });
-      }
+app.post("/request", async (req, res) => {
+  const request = req.body
+  console.log(request);
+  const result = await userRequestCollection.insertOne(request);
+  res.send(result);
+})
 
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(user.password, saltRounds);
-      user.password = hashedPassword;
+ // load All data For Home Page
+ app.get('/request', async (req, res) => {
+  const result = await userRequestCollection.find().toArray()
+  res.send(result)
+})
+// req to admin for register-------------->>>>>>>>>> End  
 
-      const result = await userCollection.insertOne(user);
-      res.status(201).json({ message: 'User registered successfully', insertedId: result.insertedId });
-    });
+
+// confirm register-------------->>>>>>>>>> Start  
+    // app.post('/register', async (req, res) => {
+    //   const user = req.body;
+    //   const query = { email: user.email };
+    //   const existingUser = await userCollection.findOne(query);
+
+    //   if (existingUser) {
+    //     return res.status(400).json({ message: 'User already exists' });
+    //   }
+
+    //   const saltRounds = 10;
+    //   const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+    //   user.password = hashedPassword;
+
+    //   const result = await userCollection.insertOne(user);
+    //   res.status(201).json({ message: 'User registered successfully', insertedId: result.insertedId });
+    // });
+
+// confirm register-------------->>>>>>>>>>  End
 
     app.get('/', (req, res) => {
       res.send('Hello World!');
